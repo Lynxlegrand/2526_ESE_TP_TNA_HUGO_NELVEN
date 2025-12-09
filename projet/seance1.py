@@ -46,12 +46,12 @@ def plot_pdm_and_spectrum(pdm, pdm_fs):
     f = np.fft.rfftfreq(N, 1/pdm_fs)
 
     # ---- Intégration du spectre avant/après 40 kHz ----
-    power_before, power_after = integrate_spectrum(P, f, 40_000)
+    power_before, power_after = integrate_spectrum(P, f, 20_000)
     snr, snr_dB = compute_snr(power_before, power_after)
 
     print("\n=== Analyse spectrale du signal PDM (brut) ===")
-    print(f"Puissance < 40 kHz : {power_before}")
-    print(f"Puissance > 40 kHz : {power_after}")
+    print(f"Puissance < 20 kHz : {power_before}")
+    print(f"Puissance > 20 kHz : {power_after}")
     print(f"SNR = {snr}")
     print(f"SNR (dB) = {snr_dB} dB")
 
@@ -73,7 +73,7 @@ def plot_pdm_and_spectrum(pdm, pdm_fs):
 # ------------------------------
 # Démodulation PDM avec choix du filtre FIR ou IIR
 # ------------------------------
-def pdm_demodulator(pdm, OSR=128, filter_type="FIR"):
+def pdm_demodulator(pdm, OSR=128, filter_type="IIR"):
     """
     Démodule un signal PDM en PCM.
     
@@ -98,6 +98,9 @@ def pdm_demodulator(pdm, OSR=128, filter_type="FIR"):
         b, a = signal.butter(order, fc)
         filtered = signal.lfilter(b, a, pdm_bipolar)
         h = (b, a)  # on retourne les coefficients IIR
+        print("a = " + str(a))
+        print("b = " + str(b))
+
 
     else:
         raise ValueError("filter_type doit être 'FIR' ou 'IIR' !")
@@ -123,12 +126,12 @@ def plot_filtered_spectrum(filtered, pdm_fs):
     f_filt = np.fft.rfftfreq(N_filt, 1/pdm_fs)
 
     # ---- Intégration + SNR ----
-    power_before, power_after = integrate_spectrum(P_filt, f_filt, 40_000)
+    power_before, power_after = integrate_spectrum(P_filt, f_filt, 20_000)
     snr, snr_dB = compute_snr(power_before, power_after)
 
     print("\n=== Analyse spectrale après filtre passe-bas ===")
-    print(f"Puissance < 40 kHz : {power_before}")
-    print(f"Puissance > 40 kHz : {power_after}")
+    print(f"Puissance < 20 kHz : {power_before}")
+    print(f"Puissance > 20 kHz : {power_after}")
     print(f"SNR = {snr}")
     print(f"SNR (dB) = {snr_dB} dB")
 
@@ -172,3 +175,4 @@ def run_seance1():
 
 if __name__ == "__main__":
     run_seance1()
+    
