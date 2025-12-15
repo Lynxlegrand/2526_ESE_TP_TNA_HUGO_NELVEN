@@ -1,8 +1,8 @@
-from seance1 import run_seance1
+from seance2 import run_seance2
 
 def main():
     print("==== 2526_ESE_TP_TNA_HUGO_NELVEN  ====")
-    run_seance1()
+    run_seance2()
 
 
     print("==== Programme terminé ====")
