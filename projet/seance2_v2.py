@@ -88,15 +88,73 @@ def run_seance2_multistage():
     t_in = np.arange(len(x_norm)) / Fs_in
     t_out = np.arange(len(y_norm)) / Fs_final
 
-    # Tracé simple signal
-    plt.figure(figsize=(12, 5))
-    plt.plot(t_in[:1000], x_norm[:1000], label="Entrée 44.1 kHz")
-    plt.plot(t_out[:1000], y_norm[:1000], label="Sortie multistage SRC")
-    plt.xlabel("Temps (s)")
-    plt.ylabel("Amplitude normalisée")
-    plt.legend()
-    plt.title("Signal entrée vs sortie multistage")
-    plt.grid()
+    # -----------------------------
+    # Figure avec 4 subplots
+    # -----------------------------
+    fig, axs = plt.subplots(2, 2, figsize=(14, 10))
+    fig.suptitle("Comparaison signal et spectre SRC multistage 44.1 kHz → 48 kHz", fontsize=16)
+
+    # 1) Signal temporel non aligné
+    axs[0, 0].plot(t_in[:2000], x_norm[:2000], label="Entrée 44.1 kHz", alpha=0.8)
+    axs[0, 0].plot(t_out[:2000], y_norm[:2000], "--", label="Sortie SRC 48 kHz", alpha=0.8)
+    axs[0, 0].set_title("Signal entrée et sortie (non alignés)")
+    axs[0, 0].set_xlabel("Temps (s)")
+    axs[0, 0].set_ylabel("Amplitude normalisée")
+    axs[0, 0].legend()
+    axs[0, 0].grid()
+
+    # 2) Signal temporel avec alignement grossier
+    delay_samples = int((len(x_norm) - len(y_norm)) / 2)
+    delay_samples = max(delay_samples, 0)
+
+    x_aligned = x_norm[delay_samples:delay_samples + len(y_norm)]
+    t_aligned = np.arange(len(x_aligned)) / Fs_final
+
+    axs[0, 1].plot(t_aligned[:2000], x_aligned[:2000], label="Entrée alignée")
+    axs[0, 1].plot(t_aligned[:2000], y_norm[:2000], "--", label="Sortie SRC alignée")
+    axs[0, 1].set_title("Signal entrée / sortie (alignement grossier)")
+    axs[0, 1].set_xlabel("Temps (s)")
+    axs[0, 1].set_ylabel("Amplitude normalisée")
+    axs[0, 1].legend()
+    axs[0, 1].grid()
+
+    # 3) Spectre amplitude linéaire
+    S_in = np.abs(np.fft.rfft(x_norm))
+    S_out = np.abs(np.fft.rfft(y_norm))
+
+    f_in = np.fft.rfftfreq(len(x_norm), 1 / Fs_in)
+    f_out = np.fft.rfftfreq(len(y_norm), 1 / Fs_final)
+
+    axs[1, 0].plot(f_in, S_in / np.max(S_in), label="Spectre entrée")
+    axs[1, 0].plot(f_out, S_out / np.max(S_out), "--", label="Spectre sortie")
+    axs[1, 0].set_xlim(0, 24000)
+    axs[1, 0].set_title("Spectre amplitude linéaire")
+    axs[1, 0].set_xlabel("Fréquence (Hz)")
+    axs[1, 0].set_ylabel("Amplitude normalisée")
+    axs[1, 0].legend()
+    axs[1, 0].grid()
+
+    # 4) Spectre FFT en dB
+    axs[1, 1].plot(
+        f_in,
+        20 * np.log10(S_in / np.max(S_in) + 1e-12),
+        label="FFT entrée (dB)"
+    )
+    axs[1, 1].plot(
+        f_out,
+        20 * np.log10(S_out / np.max(S_out) + 1e-12),
+        "--",
+        label="FFT sortie (dB)"
+    )
+    axs[1, 1].set_xlim(0, 24000)
+    axs[1, 1].set_ylim(-120, 5)
+    axs[1, 1].set_title("Spectre FFT (dB)")
+    axs[1, 1].set_xlabel("Fréquence (Hz)")
+    axs[1, 1].set_ylabel("Amplitude (dB)")
+    axs[1, 1].legend()
+    axs[1, 1].grid()
+
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
     plt.show()
 
 
