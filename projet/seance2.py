@@ -37,9 +37,9 @@ def run_seance2_plots():
 
     # Filtre unique passe-bas (filtre classique)
 
-    num_taps = 101
+    num_taps = 501
     fc = 1 / (2 * max(L, M))
-    h = signal.firwin(num_taps, fc)
+    h = signal.firwin(num_taps+1, fc)
     x_filt = signal.lfilter(h, 1, x_up)
 
     print(f"Type de filtre : Filtre passe-bas FIR")
